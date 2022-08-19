@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:linkedin_clone/model/user.dart';
 import 'package:linkedin_clone/screens/drawer_page.dart';
 import 'package:linkedin_clone/utils/utils.dart';
+import 'package:linkedin_clone/widgets/postCard.dart';
 
 class HomePage extends StatefulWidget {
   var userData;
-  HomePage({Key? key,required this.userData}) : super(key: key);
+  HomePage({Key? key, required this.userData}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -47,9 +48,32 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      drawer: DrawerPage(
-        userdata: widget.userData
+      body: StreamBuilder(
+        stream:
+            FirebaseFirestore.instance.collection('posts').snapshots(),
+        builder: (context,
+            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot)  {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: snapshot.data!.docs.length,
+              itemBuilder: (context, index) {
+                return PostCard(
+                  snap: snapshot.data!.docs[index].data(),
+                );
+              },
+            );
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
+      drawer: DrawerPage(userdata: widget.userData),
     );
   }
 }

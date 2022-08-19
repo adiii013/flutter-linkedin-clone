@@ -15,6 +15,7 @@ class AddPost extends StatefulWidget {
 
 class _AddPostState extends State<AddPost> {
   Uint8List? _file;
+  bool isFile = false;
   bool isLoading = false;
   final TextEditingController _descriptionController = TextEditingController();
 
@@ -32,6 +33,7 @@ class _AddPostState extends State<AddPost> {
                     Navigator.pop(context);
                     Uint8List file = await pickimage(ImageSource.camera);
                     setState(() {
+                      isFile = true;
                       _file = file;
                     });
                   }),
@@ -42,6 +44,7 @@ class _AddPostState extends State<AddPost> {
                     Navigator.of(context).pop();
                     Uint8List file = await pickimage(ImageSource.gallery);
                     setState(() {
+                      isFile = true;
                       _file = file;
                     });
                   }),
@@ -77,14 +80,34 @@ class _AddPostState extends State<AddPost> {
           child: TextButton(
             child: Text('Post', style: TextStyle(color: Colors.blue)),
             onPressed: () async {
-              print(widget.userdata['profileUrl']);
-              String res = await FireStoreMethods().uploadPost(
-                  _descriptionController.text.toString(),
-                  _file!,
-                  widget.userdata['uid'],
-                  widget.userdata['name'],
-                  widget.userdata['photoUrl']);
-              print(res);
+              String res = "Some error";
+              setState(() {
+                isLoading = true;
+              });
+              if (isFile) {
+                 res = await FireStoreMethods().uploadPost(
+                    _descriptionController.text.toString(),
+                    _file!,
+                    widget.userdata['uid'],
+                    widget.userdata['name'],
+                    widget.userdata['photoUrl']);
+              }
+              else{
+                 res = await FireStoreMethods().uploadPostWithoutPhoto(
+                    _descriptionController.text.toString(),
+                    widget.userdata['uid'],
+                    widget.userdata['name'],
+                    widget.userdata['photoUrl']);
+              }
+              if (res == "success") {
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => HomeScreen()));
+              } else {
+                showSnackBar(res, context);
+              }
+              setState(() {
+                isLoading = false;
+              });
             },
           ),
         ),
@@ -95,16 +118,17 @@ class _AddPostState extends State<AddPost> {
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Column(
             children: [
+              (isLoading) ? const LinearProgressIndicator() : const SizedBox(),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.all(10),
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://images.unsplash.com/photo-1611003228941-98852ba62227?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YmFieSUyMGRvZ3xlbnwwfHwwfHw%3D&w=1000&q=80'),
+                      backgroundImage:
+                          NetworkImage(widget.userdata['photoUrl']),
                     ),
                   ),
                   Container(

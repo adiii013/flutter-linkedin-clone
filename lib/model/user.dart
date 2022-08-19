@@ -5,12 +5,14 @@ class UserData {
   String email;
   String uid;
   List followers;
+  List following;
   String photoUrl;
   UserData({
     required this.email,
     required this.name,
     required this.uid,
     required this.followers,
+    required this.following,
     required this.photoUrl,
   });
 
@@ -21,6 +23,7 @@ class UserData {
         name: snapshot['name'],
         uid: snapshot['uid'],
         followers: snapshot['followers'],
+        following: snapshot['following'],
         photoUrl: snapshot['photoUrl']);
   }
 
@@ -29,6 +32,7 @@ class UserData {
         'name': name,
         'uid': uid,
         'photoUrl': photoUrl,
-        'followers': followers
+        'followers': followers,
+        'following': following,
       };
 }

@@ -4,7 +4,7 @@ import 'package:linkedin_clone/screens/login_screen.dart';
 
 class DrawerPage extends StatefulWidget {
   final userdata;
-  DrawerPage({Key? key,required this.userdata}) : super(key: key);
+  DrawerPage({Key? key, required this.userdata}) : super(key: key);
 
   @override
   State<DrawerPage> createState() => _DrawerPageState();
@@ -19,16 +19,17 @@ class _DrawerPageState extends State<DrawerPage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-             UserAccountsDrawerHeader(
+            UserAccountsDrawerHeader(
                 currentAccountPicture: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        widget.userdata['photoUrl'])),
+                    backgroundImage: NetworkImage(widget.userdata['photoUrl'])),
                 accountName: Text(widget.userdata['name']),
                 accountEmail: Text(widget.userdata['email'])),
             TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   FirebaseAuth.instance.signOut();
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
                 child: Text('Logout'))
           ],
