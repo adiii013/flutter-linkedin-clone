@@ -64,6 +64,7 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (context, index) {
                 return PostCard(
                   snap: snapshot.data!.docs[index].data(),
+                  usersnap:widget.userData,
                 );
               },
             );

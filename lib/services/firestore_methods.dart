@@ -32,6 +32,35 @@ class FireStoreMethods {
     return res;
   }
 
+  Future<String> postComment(String postId, String text, String uid,
+      String name, String profilePic) async {
+    String res = "Some error occurred";
+    try {
+      if (text.isNotEmpty) {
+        String commentId = const Uuid().v1();
+        _firestore
+            .collection('posts')
+            .doc(postId)
+            .collection('comments')
+            .doc(commentId)
+            .set({
+          'profilePic': profilePic,
+          'name': name,
+          'uid': uid,
+          'text': text,
+          'commentId': commentId,
+          'datePublished': DateTime.now(),
+        });
+        res = 'success';
+      } else {
+        res = "Please enter text";
+      }
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
   Future<String> uploadPostWithoutPhoto(String description, String uid,
       String name, String profImage) async {
     String res = "Some error occured";

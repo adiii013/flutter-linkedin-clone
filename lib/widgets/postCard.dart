@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:linkedin_clone/services/auth_methods.dart';
+import 'package:intl/intl.dart';
+import 'package:linkedin_clone/screens/comment_screen.dart';
 import 'package:linkedin_clone/services/firestore_methods.dart';
-import 'package:linkedin_clone/services/storage_methods.dart';
 import 'package:linkedin_clone/utils/utils.dart';
 import 'package:linkedin_clone/widgets/buttons.dart';
 
 class PostCard extends StatefulWidget {
   var snap;
-  PostCard({Key? key, required this.snap}) : super(key: key);
+  var usersnap;
+  PostCard({Key? key, required this.snap,required this.usersnap}) : super(key: key);
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -56,7 +57,8 @@ class _PostCardState extends State<PostCard> {
             backgroundImage: NetworkImage(widget.snap['profImage']),
           ),
           title: Text(widget.snap['name']),
-          subtitle: Text(widget.snap['name']),
+          subtitle: Text(DateFormat.yMMMd().format(
+            widget.snap['datePublished'].toDate()).toString()),
           trailing:
               (widget.snap['uid'] == FirebaseAuth.instance.currentUser!.uid)
                   ? TextButton(
@@ -74,9 +76,11 @@ class _PostCardState extends State<PostCard> {
                             await FireStoreMethods().followUser(
                                 FirebaseAuth.instance.currentUser!.uid,
                                 widget.snap['uid']);
-                                 
                           },
-                          child: Text('Following',style: TextStyle(color: Colors.black),))
+                          child: Text(
+                            'Following',
+                            style: TextStyle(color: Colors.black),
+                          ))
                       : TextButton(
                           child: Text('+ Follow'),
                           onPressed: () async {
@@ -87,7 +91,6 @@ class _PostCardState extends State<PostCard> {
                               FirebaseAuth.instance.currentUser!.uid,
                               widget.snap['uid'],
                             );
-                            
                           },
                         ),
         ),
@@ -96,13 +99,15 @@ class _PostCardState extends State<PostCard> {
           padding: EdgeInsets.only(left: 15, right: 15, bottom: 15),
           child: Text(widget.snap['description']),
         ),
-        (widget.snap['postUrl']=="none") ? SizedBox() :Container(
-          height: 300,
-          child: Image.network(
-            widget.snap['postUrl'],
-            fit: BoxFit.contain,
-          ),
-        ),
+        (widget.snap['postUrl'] == "none")
+            ? SizedBox()
+            : Container(
+                height: 300,
+                child: Image.network(
+                  widget.snap['postUrl'],
+                  fit: BoxFit.contain,
+                ),
+              ),
         Container(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             alignment: Alignment.bottomLeft,
@@ -132,7 +137,15 @@ class _PostCardState extends State<PostCard> {
                 text: 'Like',
               ),
             ),
-            ButtonLogo(icon: Icon(Icons.comment), text: 'Comment'),
+            InkWell(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => CommentScreen(
+                        snap: widget.snap,
+                        usersnap : widget.usersnap,
+                        )));
+                },
+                child: ButtonLogo(icon: Icon(Icons.comment), text: 'Comment')),
             ButtonLogo(icon: Icon(Icons.share), text: 'Share'),
             ButtonLogo(icon: Icon(Icons.send), text: 'Send'),
           ],
@@ -140,9 +153,7 @@ class _PostCardState extends State<PostCard> {
         Container(
           margin: EdgeInsets.symmetric(vertical: 15),
           height: 10,
-          decoration: BoxDecoration(
-            color: Colors.grey[200]
-          ),
+          decoration: BoxDecoration(color: Colors.grey[200]),
         )
       ],
     );
